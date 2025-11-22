@@ -1,10 +1,9 @@
-#!/usr/bin/env node
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { pathToFileURL } from 'url';
+#!/bin/sh
+# Gwen CLI launcher
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-const indexPath = join(__dirname, '..', 'dist', 'index.js');
-import(pathToFileURL(indexPath).href);
+# Run the Python CLI
+exec python3 "$ROOT_DIR/gwen.py" "$@"
