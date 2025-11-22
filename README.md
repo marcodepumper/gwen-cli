@@ -538,7 +538,23 @@ Refer to existing agents for implementation examples.
 - Check firewall isn't blocking port 8000
 
 ### CLI not found (after npm link)
+
+First, make sure you've built the project:
+
 ```bash
+npm run build
+```
+
+Then link it globally:
+
+```bash
+npm link
+```
+
+If you get a "Cannot find module" error, try unlinking and relinking:
+
+```bash
+npm unlink -g gwen-cli
 npm link
 ```
 
