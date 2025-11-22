@@ -71,20 +71,18 @@ GWEN is a pure Python application with two main components:
 
 3. **Windows Users**
    
-   **Option A**: Run from project directory:
+   Use the included `gwen.bat` wrapper:
    ```cmd
    cd D:\github\gwen-cli
    .\gwen.bat status
    .\gwen.bat maintenance
    ```
    
-   **Option B**: Add to PATH (for global access):
+   **Optional - Add to PATH for global access:**
    ```cmd
    # Add D:\github\gwen-cli to your PATH environment variable
-   # Then you can run: gwen.bat status
+   # Then you can run from anywhere: gwen.bat status
    ```
-   
-   Note: Use `.\gwen.bat` or the full path to avoid conflicts with other `gwen` commands.
 
 4. **Unix/Linux/macOS Users**
    Make CLI executable:
@@ -340,9 +338,8 @@ Check backend logs for agent execution errors. Some agents may require API keys 
 
 ### Commands not working
 - **Windows**: Use `.\gwen.bat` from project directory or `python gwen.py`
-  - If you see Node.js errors, there's a conflicting `gwen` command in your PATH
-  - Solution: Use `.\gwen.bat` (with `.\` prefix) or `python gwen.py`
 - **Unix/Linux/macOS**: Use `python gwen.py` or `./bin/gwen`
+- If you get "command not found", ensure you're in the project directory
 
 ### Component status not showing
 Component-level details are currently available for Cloudflare only. Other services show overall status.
