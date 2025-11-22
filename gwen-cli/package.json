@@ -1,0 +1,39 @@
+{
+  "name": "gwen-cli",
+  "version": "1.0.0",
+  "description": "GWEN - Interactive TUI for multi-agent orchestration",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "gwen": "./bin/gwen"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "tui",
+    "agents",
+    "orchestration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ink": "^4.4.1",
+    "react": "^18.2.0",
+    "chalk": "^4.1.2",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/node-fetch": "^2.6.11",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

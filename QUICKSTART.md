@@ -1,12 +1,12 @@
 # GWEN Quick Start Guide
 
-Get the multi-cloud status monitoring dashboard running in 2 minutes.
+Get the multi-cloud status monitoring CLI running in 2 minutes.
 
 ## Prerequisites
 
 - **Python 3.13+** (backend)
-- **Node.js 18+** (frontend)
-- **npm** or **yarn**
+- **Node.js 18+** (CLI)
+- **npm**
 
 ## Setup
 
@@ -22,31 +22,29 @@ python main.py
 
 Backend will run on **http://localhost:8000**
 
-### 2. Frontend Setup (React/TypeScript)
+### 2. CLI Setup (TypeScript/Ink)
 
 ```bash
-# Navigate to frontend directory
-cd frontend
+# Navigate to CLI directory
+cd gwen-cli
 
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Build the CLI
+npm run build
+
+# Start GWEN
+node dist/index.js
 ```
 
-Frontend will run on **http://localhost:3000** with automatic backend proxy.
-
-## Access the Dashboard
-
-Open your browser to: **http://localhost:3000**
-
-You'll see:
-- **Left Panel**: List of 7 monitored services (Cloudflare, AWS, Azure, GCP, GitHub, Datadog, Atlassian)
-- **Center Panel**: Dashboard overview or detailed agent view (click an agent to see details)
-- **Right Panel**: Live logs for selected agent
-
 ## What You'll See
+
+The GWEN CLI automatically:
+- Connects to the backend at http://localhost:8000
+- Starts all 7 agents immediately
+- Displays a live dashboard with real-time status updates
+- Auto-refreshes every 5 minutes
 
 The dashboard monitors:
 1. **Cloudflare** - CDN/DNS status + scheduled maintenance
@@ -58,32 +56,44 @@ The dashboard monitors:
 7. **Atlassian** - Jira/Confluence/Bitbucket status
 
 Each agent shows:
-- **Current status** (idle/thinking/completed/warning/error)
-- **14-day incident history**
-- **Scheduled maintenance** (Cloudflare only currently)
-- **Detailed logs** with execution times
-- **Key metrics** (incident counts, status indicators)
+- **Current status** (Operational/Degraded/Issues Detected)
+- **14-day incident summary**
+- **Color-coded indicators** (✓ Operational, ⚠ Degraded)
+
+## CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `/start-agents` | Execute all agents |
+| `/run-agent <name>` | Execute a specific agent |
+| `/list-agents` | List all available agents |
+| `/detail` | Browse detailed agent results |
+| `/help` | Show command reference |
+| `/exit` | Exit GWEN |
+
+**Tips**:
+- Press `/` to open the command palette
+- Use arrow keys to navigate
+- Press ESC to close dialogs
 
 ## Features
 
-✨ **Matrix Terminal Aesthetic**: Dark theme with neon green (#00FF41), monospace fonts, glow effects  
-🔄 **Real-time Updates**: Polls every 3 seconds  
-⏱️ **Auto-Retrieve**: Optional automatic status checks every 5 minutes  
-🎯 **Priority Sorting**: Non-operational services automatically appear first  
-🏢 **Company Logos**: Authentic brand logos with optimized visibility  
-📊 **Comprehensive Data**: 14-day history, no data consolidation  
-📋 **Human-Readable Metrics**: Formatted data with clear status descriptions  
-🎨 **Color-coded States**: Visual indication of agent status  
-📝 **Live Logs**: See exactly what each agent is doing  
+✨ **Terminal Dashboard**: Beautiful TUI powered by Ink (React for CLIs)  
+🔄 **Auto-Refresh**: Automatic status checks every 5 minutes  
+🎯 **Minimalist**: Only essential commands - no redundancy  
+🏢 **Multi-Service Monitoring**: 7 cloud platforms and services  
+📊 **14-Day History**: Comprehensive incident tracking  
+📋 **Human-Readable**: Formatted data with clear status descriptions  
+🎨 **Color-coded**: Visual indication of service health  
 
 ## Architecture
 
 ```
-Backend (Port 8000)          Frontend (Port 3000)
+Backend (Port 8000)          CLI (Terminal)
 ┌─────────────────┐         ┌──────────────────┐
-│   FastAPI App   │◄────────│   React + Vite   │
-│                 │  Proxy  │                  │
-│ 7 Agent Workers │  /api   │  Matrix Theme UI │
+│   FastAPI App   │◄────────│   Ink/React TUI  │
+│                 │   HTTP  │                  │
+│ 7 Agent Workers │         │  Live Dashboard  │
 └─────────────────┘         └──────────────────┘
 ```
 
@@ -95,7 +105,7 @@ The backend exposes:
 - `POST /retrieve-status` - Trigger full status check
 - `GET /health` - Health check
 
-Frontend automatically calls these via Vite proxy.
+CLI automatically calls these endpoints.
 
 ## Development Workflow
 
@@ -105,17 +115,17 @@ python main.py
 # Backend running on http://localhost:8000
 ```
 
-### Terminal 2 - Frontend
+### Terminal 2 - CLI
 ```bash
-cd frontend
-npm run dev
-# Frontend running on http://localhost:3000
+cd gwen-cli
+node dist/index.js
+# CLI connects to backend and starts monitoring
 ```
 
 ### Making Changes
 
 **Backend**: Python changes auto-reload with uvicorn  
-**Frontend**: React changes hot-reload with Vite HMR  
+**CLI**: TypeScript changes require rebuild: `npm run build`
 
 ## Troubleshooting
 
@@ -123,41 +133,24 @@ npm run dev
 - Check Python version: `python --version` (need 3.13+)
 - Install dependencies: `pip install -r requirements.txt`
 
-### Frontend won't start
+### CLI won't start
 - Check Node version: `node --version` (need 18+)
-- Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
+- Build the CLI: `cd gwen-cli && npm run build`
+- Verify dist/index.js exists
 
-### Frontend can't connect to backend
+### CLI can't connect to backend
 - Verify backend is running on port 8000
-- Check Vite proxy config in `frontend/vite.config.ts`
-- Look for CORS errors in browser console
-
-### CSS/Tailwind not working
-- Run `npm install` to ensure PostCSS and Tailwind are installed
-- Check `tailwind.config.js` and `postcss.config.js` exist
-- Restart Vite dev server
+- Check backend logs for errors
+- Ensure no firewall blocking localhost:8000
 
 ## Next Steps
 
-1. **Explore Features**: Click the "● AUTO-RETRIEVE: OFF" button to enable 5-minute automatic updates
-2. **Customize Theme**: Edit `frontend/tailwind.config.js` for different colors
+1. **Use Commands**: Press `/` to see available commands
+2. **View Details**: Run `/detail` to browse full agent results
 3. **Add More Agents**: Create new agent in `agents/` directory
 4. **Production Deploy**: 
-   - Backend: `uvicorn main:app --host 0.0.0.0 --port 8000`
-   - Frontend: `npm run build` then serve `dist/` folder
-
-## Production Build
-
-```bash
-# Backend (no build needed)
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
-
-# Frontend
-cd frontend
-npm run build
-# Serve the dist/ folder with any static file server
-npm run preview  # Or use nginx, Apache, etc.
-```
+   - Backend: `uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4`
+   - CLI: Package with `npm run build` and distribute
 
 ## File Structure
 
@@ -166,11 +159,11 @@ gwen/
 ├── agents/               # 7 monitoring agents
 ├── orchestrator/         # Agent coordination
 ├── common/              # Shared utilities
-├── frontend/            # React dashboard
+├── gwen-cli/            # Terminal UI
 │   ├── src/
-│   │   ├── components/  # UI components
-│   │   ├── api/        # Backend integration
-│   │   ├── types/      # TypeScript definitions
+│   │   ├── ui/         # UI components
+│   │   ├── commands/   # Command handlers
+│   │   ├── core/       # API client
 │   │   └── App.tsx     # Main app
 │   └── package.json
 ├── main.py             # FastAPI server
@@ -181,9 +174,9 @@ gwen/
 ## Support
 
 - Full docs: See `README.md`
-- Frontend docs: See `frontend/README.md`
-- Issues: Check browser console + backend logs
+- CLI docs: See `gwen-cli/README.md`
+- Issues: Check CLI output + backend logs
 
 ---
 
-**You're ready!** 🚀 Both services should be running and the dashboard accessible at http://localhost:3000
+**You're ready!** 🚀 Backend and CLI should be running with live monitoring

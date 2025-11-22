@@ -1,6 +1,6 @@
-# Gwen Multi-Agent System
+# GWEN Multi-Agent System
 
-A production-ready, async multi-agent orchestration system built with Python 3.10+ and FastAPI. Gwen provides unified monitoring and management across multiple cloud services and platforms.
+A production-ready, async multi-agent orchestration system with a terminal-based interface. GWEN provides unified monitoring and management across multiple cloud services and platforms through a sleek CLI powered by Ink (React for CLIs).
 
 ## 🏗️ Architecture
 
@@ -21,15 +21,15 @@ gwen/
 │   ├── models.py       # Pydantic models for status and reports
 │   ├── config.py       # Settings and environment configuration
 │   └── logging.py      # Logging utilities
-├── frontend/           # React/TypeScript UI (Matrix theme)
+├── gwen-cli/           # Terminal UI (Ink/React)
 │   ├── src/
-│   │   ├── components/ # React components (AgentList, Dashboard, Logs)
-│   │   ├── api/        # API integration layer
-│   │   ├── types/      # TypeScript interfaces
+│   │   ├── ui/         # UI components (Header, Dashboard, AgentDetail)
+│   │   ├── commands/   # Command handlers for CLI
+│   │   ├── core/       # API client and utilities
+│   │   ├── types.ts    # TypeScript interfaces
 │   │   └── App.tsx     # Main application
 │   ├── package.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
+│   └── tsconfig.json
 ├── main.py             # FastAPI application and endpoints
 ├── requirements.txt    # Python dependencies
 └── .env.example        # Environment configuration template
@@ -38,25 +38,24 @@ gwen/
 ## 🚀 Features
 
 - **Async Multi-Agent Execution**: Concurrent execution of multiple monitoring agents
-- **Matrix-Themed Dashboard**: React+TypeScript frontend with retro terminal aesthetic
+- **Terminal Dashboard**: Beautiful TUI powered by Ink with real-time updates
+- **Auto-Refresh**: Automatically re-runs all agents every 5 minutes
 - **14-Day History Window**: Comprehensive incident and maintenance tracking
 - **Scheduled Maintenance Detection**: Tracks in-progress and upcoming maintenance windows
 - **Dashboard-Ready State**: In-memory state management for real-time visualization
 - **RESTful API**: FastAPI endpoints for triggering reports and retrieving status
-- **Real-time Polling**: Frontend updates every 3 seconds
-- **Auto-Retrieve**: Optional automatic status retrieval every 5 minutes
 - **Priority Sorting**: Non-operational services automatically appear first in dashboard
-- **Company Logos**: Authentic brand logos with optimized visibility
-- **Three-Pane Layout**: Agent list, dashboard/detail view, and live logs
+- **Detail View**: Full-screen browsing of detailed agent results
+- **Minimalist Commands**: Only essential commands - no redundancy
 - **Human-Readable Data**: Formatted metrics with clear status descriptions
 - **Modular Design**: Easy to extend with new agents
 - **Comprehensive Logging**: Detailed execution logs and error handling
-- **Type Safety**: Full type hints (Python) and TypeScript (Frontend)
+- **Type Safety**: Full type hints (Python) and TypeScript (CLI)
 
 ## 📋 Prerequisites
 
 - Python 3.13 or higher
-- Node.js 18+ and npm (for frontend)
+- Node.js 18+ and npm (for CLI)
 - pip for Python dependency management
 - API credentials for services you want to monitor (optional - agents use public status pages)
 
@@ -67,12 +66,19 @@ gwen/
 mkdir gwen && cd gwen
 ```
 
-2. **Install dependencies**:
+2. **Install Python dependencies**:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Configure environment variables**:
+3. **Install CLI dependencies**:
+```bash
+cd gwen-cli
+npm install
+npm run build
+```
+
+4. **Configure environment variables**:
 ```bash
 cp .env.example .env
 # Edit .env with your API credentials
@@ -94,41 +100,51 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 
 The backend API will be available at `http://localhost:8000`
 
-### Frontend (React/TypeScript)
+### GWEN CLI
 
-**Setup**:
+**Start the CLI**:
 ```bash
-cd frontend
-npm install
+cd gwen-cli
+node dist/index.js
 ```
 
-**Development Mode**:
-```bash
-npm run dev
-```
+The CLI will automatically:
+- Connect to the backend at `http://localhost:8000`
+- Start all agents immediately
+- Auto-refresh every 5 minutes
+- Display live dashboard with agent status
 
-The frontend will be available at `http://localhost:3000` with automatic proxy to backend.
-
-**Production Build**:
-```bash
-npm run build
-npm run preview
-```
-
-### Full Stack Development
+### Full Development Setup
 
 1. Start backend (terminal 1):
    ```bash
    python main.py
    ```
 
-2. Start frontend (terminal 2):
+2. Start CLI (terminal 2):
    ```bash
-   cd frontend
-   npm run dev
+   cd gwen-cli
+   node dist/index.js
    ```
 
-3. Open browser to `http://localhost:3000`
+## 🎮 CLI Commands
+
+GWEN CLI provides a minimalist command interface:
+
+| Command | Description |
+|---------|-------------|
+| `/start-agents` | Execute all agents (aliases: `/start`, `/run`) |
+| `/run-agent <name>` | Execute a specific agent |
+| `/list-agents` | List all available agents |
+| `/detail` | Browse detailed agent results in full-screen view |
+| `/help` | Show command reference |
+| `/exit` | Exit GWEN |
+
+**Tips**:
+- Press `/` to open the command palette
+- Use arrow keys to navigate
+- Press ESC to close dialogs
+- Dashboard updates automatically
 
 ## 📡 API Endpoints
 
@@ -225,36 +241,6 @@ pip install datadog-api-client
 - Replace `simulate_api_call()` with actual API calls
 - Implement authentication in `initialize()` methods
 - Add error handling for service-specific exceptions
-
-## 📊 Dashboard Integration
-
-The system is designed for easy dashboard integration:
-
-### Frontend Structure
-```javascript
-// Example React component structure
-const Dashboard = () => {
-  const [agents, setAgents] = useState({});
-  
-  // Poll agent status
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const response = await fetch('/agent-status');
-      const data = await response.json();
-      setAgents(data);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  return (
-    <div className="dashboard">
-      <AgentList agents={agents} />      // Left pane
-      <AgentDetails selected={selected} /> // Middle pane
-      <ExecutionHistory />                 // Right pane
-    </div>
-  );
-};
-```
 
 ## 🔐 Authentication (To Implement)
 
