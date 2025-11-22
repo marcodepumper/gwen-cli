@@ -225,7 +225,10 @@ class Orchestrator:
             status=status.state.value,
             summary=summary_text,
             key_metrics=key_metrics,
-            execution_time=status.duration_seconds()
+            execution_time=status.duration_seconds(),
+            raw_output=status.raw_output,
+            start_time=status.start_time,
+            end_time=status.end_time
         )
     
     async def summarize_agent_output(self, status: AgentStatus) -> str:

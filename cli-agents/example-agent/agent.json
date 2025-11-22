@@ -1,7 +1,0 @@
-{
-  "name": "example-agent",
-  "version": "1.0.0",
-  "description": "Example agent demonstrating GWEN agent structure",
-  "author": "GWEN",
-  "timeout": 30000
-}

@@ -287,7 +287,7 @@ async def get_execution_history(limit: int = 10) -> List[Dict[str, Any]]:
 
 
 @app.get("/agents")
-async def list_agents() -> Dict[str, List[Dict[str, Any]]]:
+async def list_agents() -> Dict[str, Any]:
     """
     List all available agents with their metadata.
     

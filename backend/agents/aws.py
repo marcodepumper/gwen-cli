@@ -81,6 +81,7 @@ class AWSAgent(BaseAgent):
         """
         import aiohttp
         from datetime import timezone
+        import re
         
         rss_url = "https://health.aws.amazon.com/health/status"
         
@@ -90,30 +91,32 @@ class AWSAgent(BaseAgent):
                     if response.status == 200:
                         xml_content = await response.text()
                         
-                        # Parse RSS feed
-                        root = ET.fromstring(xml_content)
+                        # AWS RSS feed has known issues with malformed XML
+                        # Use regex to extract items directly instead of full XML parsing
+                        items = []
                         
-                        # Get all items (events) from RSS feed
-                        items = root.findall('.//item')
+                        # Pattern to find item blocks
+                        item_pattern = re.compile(r'<item>(.*?)</item>', re.DOTALL)
+                        item_matches = item_pattern.findall(xml_content)
                         
-                        events = []
-                        for item in items:
-                            title_elem = item.find('title')
-                            link_elem = item.find('link')
-                            desc_elem = item.find('description')
-                            pub_date_elem = item.find('pubDate')
-                            guid_elem = item.find('guid')
-                            
-                            if title_elem is not None and pub_date_elem is not None:
-                                try:
-                                    # Parse pubDate (RFC 822 format)
-                                    pub_date_str = pub_date_elem.text
+                        for item_content in item_matches:
+                            try:
+                                # Extract fields using regex
+                                title_match = re.search(r'<title><!\[CDATA\[(.*?)\]\]></title>', item_content)
+                                link_match = re.search(r'<link>(.*?)</link>', item_content)
+                                desc_match = re.search(r'<description><!\[CDATA\[(.*?)\]\]></description>', item_content, re.DOTALL)
+                                pub_date_match = re.search(r'<pubDate>(.*?)</pubDate>', item_content)
+                                guid_match = re.search(r'<guid.*?>(.*?)</guid>', item_content)
+                                
+                                if title_match and pub_date_match:
+                                    title = title_match.group(1).strip()
+                                    pub_date_str = pub_date_match.group(1).strip()
+                                    
+                                    # Parse pubDate
                                     pub_date = datetime.strptime(pub_date_str, '%a, %d %b %Y %H:%M:%S %Z')
                                     pub_date = pub_date.replace(tzinfo=timezone.utc)
                                     
                                     # Extract service and region from title
-                                    # Format: "Service Issue: [Service Name] - [Region]"
-                                    title = title_elem.text
                                     service = "Unknown"
                                     region = "Global"
                                     
@@ -134,20 +137,22 @@ class AWSAgent(BaseAgent):
                                     elif "Resolved" in title:
                                         status = "resolved"
                                     
-                                    events.append({
-                                        "id": guid_elem.text if guid_elem is not None else link_elem.text if link_elem is not None else "",
+                                    items.append({
+                                        "id": guid_match.group(1).strip() if guid_match else (link_match.group(1).strip() if link_match else ""),
                                         "title": title,
                                         "service": service,
                                         "region": region,
-                                        "description": desc_elem.text if desc_elem is not None else "",
-                                        "link": link_elem.text if link_elem is not None else "",
+                                        "description": desc_match.group(1).strip() if desc_match else "",
+                                        "link": link_match.group(1).strip() if link_match else "",
                                         "published": pub_date_str,
                                         "published_date": pub_date.isoformat(),
                                         "status": status
                                     })
-                                except Exception as e:
-                                    self.logger.warning(f"Error parsing RSS item: {e}")
-                                    continue
+                            except Exception as e:
+                                self.logger.warning(f"Error parsing RSS item: {e}")
+                                continue
+                        
+                        return items
                         
                         return events
                     else:

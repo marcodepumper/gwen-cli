@@ -1,7 +1,0 @@
-{
-  "name": "service-status",
-  "version": "1.0.0",
-  "description": "Check status of external services",
-  "author": "GWEN",
-  "timeout": 30000
-}

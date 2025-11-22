@@ -49,6 +49,16 @@ class CloudflareAgent(BaseAgent):
         else:
             self.status.add_message(f"Status: {original_status}")
         
+        # Track non-operational components
+        non_operational = [c for c in components if c["status"] != "operational"]
+        non_operational_by_region = self._group_components_by_region(non_operational) if non_operational else {}
+        
+        # Log for debugging
+        if non_operational:
+            self.logger.info(f"Found {len(non_operational)} non-operational components")
+            for comp in non_operational[:5]:  # Log first 5
+                self.logger.info(f"  Component: {comp['name']} - Status: {comp['status']}")
+        
         # Initialize result dictionary
         result = {
             "status": status_data,
@@ -56,7 +66,9 @@ class CloudflareAgent(BaseAgent):
             "recent_incidents": [],
             "scheduled_maintenance": scheduled,
             "components": components,
-            "components_by_region": self._group_components_by_region(components)
+            "components_by_region": self._group_components_by_region(components),
+            "non_operational_components": non_operational,
+            "non_operational_components_by_region": non_operational_by_region
         }
         
         # If not operational, get unresolved incidents
@@ -70,6 +82,8 @@ class CloudflareAgent(BaseAgent):
             result["ongoing_incidents_by_region"] = self._group_incidents_by_region(unresolved)
         else:
             self.status.add_message("All systems operational")
+            if non_operational:
+                self.status.add_message(f"Note: {len(non_operational)} component(s) not operational (re-routed/degraded)")
         
         # Get incidents from the last 14 days
         self.status.add_message("Fetching incidents from the last 14 days")

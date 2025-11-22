@@ -51,6 +51,9 @@ class AgentSummary(BaseModel):
     summary: str = Field(..., description="Brief summary of agent output")
     key_metrics: Dict[str, Any] = Field(default_factory=dict, description="Key metrics extracted")
     execution_time: Optional[float] = Field(None, description="Execution time in seconds")
+    raw_output: Optional[Dict[str, Any]] = Field(None, description="Raw output data from agent")
+    start_time: Optional[datetime] = Field(None, description="Execution start time")
+    end_time: Optional[datetime] = Field(None, description="Execution end time")
     
     class Config:
         json_encoders = {
