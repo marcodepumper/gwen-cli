@@ -70,12 +70,21 @@ GWEN is a pure Python application with two main components:
    ```
 
 3. **Windows Users**
-   Use the included `gwen.bat` wrapper for shorter commands:
+   
+   **Option A**: Run from project directory:
    ```cmd
-   gwen status
-   gwen maintenance
-   gwen help
+   cd D:\github\gwen-cli
+   .\gwen.bat status
+   .\gwen.bat maintenance
    ```
+   
+   **Option B**: Add to PATH (for global access):
+   ```cmd
+   # Add D:\github\gwen-cli to your PATH environment variable
+   # Then you can run: gwen.bat status
+   ```
+   
+   Note: Use `.\gwen.bat` or the full path to avoid conflicts with other `gwen` commands.
 
 4. **Unix/Linux/macOS Users**
    Make CLI executable:
@@ -99,20 +108,24 @@ The backend will initialize all 7 monitoring agents and listen on `http://127.0.
 
 ### 2. Use the CLI
 
-**Windows (using gwen.bat wrapper):**
+**Windows (from project directory):**
 ```cmd
-gwen status
-gwen incidents
-gwen maintenance
-gwen help
+.\gwen.bat status
+.\gwen.bat incidents
+.\gwen.bat maintenance
+.\gwen.bat help
+```
+
+**Or use Python directly:**
+```cmd
+python gwen.py status
 ```
 
 **Unix/Linux/macOS:**
 ```bash
 python gwen.py status
-python gwen.py incidents
-python gwen.py maintenance
-python gwen.py help
+# Or use the shell wrapper:
+./bin/gwen status
 ```
 
 ## Usage
@@ -124,10 +137,11 @@ Show current operational status of all services or a specific agent.
 
 ```bash
 # All services - shows summary table
-gwen status
+.\gwen.bat status
+# or: python gwen.py status
 
 # Specific service - shows detailed breakdown
-gwen status CloudflareAgent
+.\gwen.bat status CloudflareAgent
 ```
 
 **Summary table includes:**
@@ -159,13 +173,13 @@ Display current and recent incidents.
 
 ```bash
 # All ongoing incidents
-gwen incidents
+.\gwen.bat incidents
 
 # Specific service with recent history
-gwen incidents CloudflareAgent --show-recent --days 7
+.\gwen.bat incidents CloudflareAgent --show-recent --days 7
 
 # Last 14 days of incidents
-gwen incidents --days 14 --show-recent
+.\gwen.bat incidents --days 14 --show-recent
 ```
 
 **Options:**
@@ -182,10 +196,10 @@ Show upcoming and in-progress scheduled maintenance.
 
 ```bash
 # All services
-gwen maintenance
+.\gwen.bat maintenance
 
 # Specific service - shows regional grouping
-gwen maintenance CloudflareAgent
+.\gwen.bat maintenance CloudflareAgent
 ```
 
 **Features:**
@@ -210,14 +224,14 @@ Latin America & Caribbean: 13 scheduled
 List all available monitoring agents.
 
 ```bash
-gwen list-agents
+.\gwen.bat list-agents
 ```
 
 #### `help`
 Display detailed command reference with examples.
 
 ```bash
-gwen help
+.\gwen.bat help
 ```
 
 ### Example Output
@@ -325,7 +339,9 @@ curl http://localhost:8000/health
 Check backend logs for agent execution errors. Some agents may require API keys or specific network access.
 
 ### Commands not working
-- **Windows**: Use `gwen` commands (via gwen.bat wrapper)
+- **Windows**: Use `.\gwen.bat` from project directory or `python gwen.py`
+  - If you see Node.js errors, there's a conflicting `gwen` command in your PATH
+  - Solution: Use `.\gwen.bat` (with `.\` prefix) or `python gwen.py`
 - **Unix/Linux/macOS**: Use `python gwen.py` or `./bin/gwen`
 
 ### Component status not showing
