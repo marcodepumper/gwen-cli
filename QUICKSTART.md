@@ -17,7 +17,7 @@ Get the multi-cloud status monitoring CLI running in 2 minutes.
 pip install -r requirements.txt
 
 # Start the backend server
-python main.py
+cd backend; python main.py
 ```
 
 Backend will run on **http://localhost:8000**
@@ -111,7 +111,7 @@ CLI automatically calls these endpoints.
 
 ### Terminal 1 - Backend
 ```bash
-python main.py
+cd backend; python main.py
 # Backend running on http://localhost:8000
 ```
 
@@ -159,7 +159,7 @@ gwen/
 ├── agents/               # 7 monitoring agents
 ├── orchestrator/         # Agent coordination
 ├── common/              # Shared utilities
-├── gwen-cli/            # Terminal UI
+├──             # Terminal UI
 │   ├── src/
 │   │   ├── ui/         # UI components
 │   │   ├── commands/   # Command handlers
@@ -173,8 +173,8 @@ gwen/
 
 ## Support
 
-- Full docs: See `README.md`
-- CLI docs: See `gwen-cli/README.md`
+- Full docs: See README.md in repo root
+- CLI docs: See README.md in repo root
 - Issues: Check CLI output + backend logs
 
 ---

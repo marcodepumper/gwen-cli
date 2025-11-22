@@ -1,359 +1,445 @@
-# GWEN Multi-Agent System
+# GWEN - Interactive TUI for Multi-Agent Orchestration
 
-A production-ready, async multi-agent orchestration system with a terminal-based interface. GWEN provides unified monitoring and management across multiple cloud services and platforms through a sleek CLI powered by Ink (React for CLIs).
-
-## 🏗️ Architecture
-
-```
-gwen/
-├── agents/              # Primary agent implementations
-│   ├── base.py         # Base agent class with common functionality
-│   ├── cloudflare.py   # Cloudflare DNS/CDN/Security monitoring
-│   ├── aws.py          # AWS Health Dashboard monitoring
-│   ├── azure.py        # Azure public cloud status (RSS feed)
-│   ├── gcp.py          # Google Cloud Platform monitoring
-│   ├── atlassian.py    # Jira & Confluence integration
-│   ├── github.py       # GitHub repository and CI/CD monitoring
-│   └── datadog.py      # Infrastructure and APM monitoring
-├── orchestrator/        # Agent orchestration logic
-│   └── orchestrator.py # Concurrent execution and state management
-├── common/             # Shared utilities and models
-│   ├── models.py       # Pydantic models for status and reports
-│   ├── config.py       # Settings and environment configuration
-│   └── logging.py      # Logging utilities
-├── gwen-cli/           # Terminal UI (Ink/React)
-│   ├── src/
-│   │   ├── ui/         # UI components (Header, Dashboard, AgentDetail)
-│   │   ├── commands/   # Command handlers for CLI
-│   │   ├── core/       # API client and utilities
-│   │   ├── types.ts    # TypeScript interfaces
-│   │   └── App.tsx     # Main application
-│   ├── package.json
-│   └── tsconfig.json
-├── main.py             # FastAPI application and endpoints
-├── requirements.txt    # Python dependencies
-└── .env.example        # Environment configuration template
-```
-
-## 🚀 Features
-
-- **Async Multi-Agent Execution**: Concurrent execution of multiple monitoring agents
-- **Terminal Dashboard**: Beautiful TUI powered by Ink with real-time updates
-- **Auto-Refresh**: Automatically re-runs all agents every 5 minutes
-- **14-Day History Window**: Comprehensive incident and maintenance tracking
-- **Scheduled Maintenance Detection**: Tracks in-progress and upcoming maintenance windows
-- **Dashboard-Ready State**: In-memory state management for real-time visualization
-- **RESTful API**: FastAPI endpoints for triggering reports and retrieving status
-- **Priority Sorting**: Non-operational services automatically appear first in dashboard
-- **Detail View**: Full-screen browsing of detailed agent results
-- **Minimalist Commands**: Only essential commands - no redundancy
-- **Human-Readable Data**: Formatted metrics with clear status descriptions
-- **Modular Design**: Easy to extend with new agents
-- **Comprehensive Logging**: Detailed execution logs and error handling
-- **Type Safety**: Full type hints (Python) and TypeScript (CLI)
-
-## 📋 Prerequisites
-
-- Python 3.13 or higher
-- Node.js 18+ and npm (for CLI)
-- pip for Python dependency management
-- API credentials for services you want to monitor (optional - agents use public status pages)
-
-## 🔧 Installation
-
-1. **Clone or create the project structure**:
-```bash
-mkdir gwen && cd gwen
-```
-
-2. **Install Python dependencies**:
-```bash
-pip install -r requirements.txt
-```
-
-3. **Install CLI dependencies**:
-```bash
-cd gwen-cli
-npm install
-npm run build
-```
-
-4. **Configure environment variables**:
-```bash
-cp .env.example .env
-# Edit .env with your API credentials
-```
-
-## 🏃 Running the Application
-
-### Backend (Python/FastAPI)
-
-**Development Mode**:
-```bash
-python main.py
-```
-
-**Production Mode**:
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-The backend API will be available at `http://localhost:8000`
-
-### GWEN CLI
-
-**Start the CLI**:
-```bash
-cd gwen-cli
-node dist/index.js
-```
-
-The CLI will automatically:
-- Connect to the backend at `http://localhost:8000`
-- Start all agents immediately
-- Auto-refresh every 5 minutes
-- Display live dashboard with agent status
-
-### Full Development Setup
-
-1. Start backend (terminal 1):
-   ```bash
-   python main.py
-   ```
-
-2. Start CLI (terminal 2):
-   ```bash
-   cd gwen-cli
-   node dist/index.js
-   ```
-
-## 🎮 CLI Commands
-
-GWEN CLI provides a minimalist command interface:
-
-| Command | Description |
-|---------|-------------|
-| `/start-agents` | Execute all agents (aliases: `/start`, `/run`) |
-| `/run-agent <name>` | Execute a specific agent |
-| `/list-agents` | List all available agents |
-| `/detail` | Browse detailed agent results in full-screen view |
-| `/help` | Show command reference |
-| `/exit` | Exit GWEN |
-
-**Tips**:
-- Press `/` to open the command palette
-- Use arrow keys to navigate
-- Press ESC to close dialogs
-- Dashboard updates automatically
-
-## 📡 API Endpoints
-
-### Core Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | System info and available endpoints |
-| `/health` | GET | Health check for monitoring |
-| `/retrieve-status` | POST | Execute all agents and get aggregated status |
-| `/agent-status` | GET | Get current status of all agents |
-| `/agent-status/{name}` | GET | Get status for specific agent |
-| `/agent-logs/{name}` | GET | Get detailed logs for specific agent |
-| `/execution-history` | GET | Get recent execution history |
-| `/agents` | GET | List all available agents |
-| `/agents/{name}/execute` | POST | Execute a single agent |
-
-### Example Usage
-
-#### Execute All Agents
-```bash
-curl -X POST http://localhost:8000/retrieve-status
-```
-
-#### Get All Agent Status
-```bash
-curl http://localhost:8000/agent-status
-```
-
-#### Get Specific Agent Logs
-```bash
-curl http://localhost:8000/agent-logs/CloudflareAgent
-```
-
-## 🎯 Agent Capabilities
-
-### CloudflareAgent
-- Status page monitoring (status.cloudflare.com)
-- Incident tracking (14-day history)
-- Scheduled maintenance detection with in-progress tracking
-- Component status monitoring
-
-### AWSAgent
-- AWS Health Dashboard events
-- Service health monitoring
-- Event history (14 days)
-- Regional status tracking
-
-### AzureAgent
-- Azure public cloud status (RSS feed: azure.status.microsoft/en-us/status/feed/)
-- Service incident tracking
-- Historical incident data (14 days)
-- All Azure services monitoring
-
-### GCPAgent
-- Google Cloud Platform status monitoring
-- Incident filtering (14-day history)
-- Service health tracking
-- Multi-region monitoring
-
-### AtlassianAgent
-- Atlassian status page monitoring
-- Jira/Confluence/Bitbucket status
-- Incident history (14 days)
-- Component-level tracking
-
-### GitHubAgent
-- GitHub Services status (githubstatus.com)
-- Incident tracking (14 days)
-- GitHub Actions, API, Git operations status
-- Historical incident data
-
-### DatadogAgent
-- Datadog status page monitoring (status.datadoghq.com)
-- Infrastructure monitoring status
-- Incident history (14 days)
-- Service health tracking
-
-## 🔌 Integration Points
-
-The scaffold includes placeholders for real API integrations. To connect real services:
-
-1. **Install service-specific SDKs**:
-```bash
-# Examples
-pip install cloudflare
-pip install azure-mgmt-resource azure-identity
-pip install atlassian-python-api
-pip install PyGithub
-pip install datadog-api-client
-```
-
-2. **Update agent implementations**:
-- Replace `simulate_api_call()` with actual API calls
-- Implement authentication in `initialize()` methods
-- Add error handling for service-specific exceptions
-
-## 🔐 Authentication (To Implement)
-
-Add authentication middleware:
-```python
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-security = HTTPBearer()
-
-async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-    # Verify token logic
-    if not verify_jwt(token):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    return token
-
-# Apply to endpoints
-@app.post("/retrieve-status", dependencies=[Depends(verify_token)])
-async def retrieve_status():
-    # ... existing logic
-```
-
-## 🧪 Testing
-
-Create test files:
-```python
-# tests/test_agents.py
-import pytest
-from agents import CloudflareAgent
-
-@pytest.mark.asyncio
-async def test_cloudflare_agent():
-    agent = CloudflareAgent()
-    status = await agent.get_status()
-    assert status.agent_name == "CloudflareAgent"
-    assert status.state in ["completed", "warning", "error"]
-```
-
-Run tests:
-```bash
-pytest tests/ -v --asyncio-mode=auto
-```
-
-## 📝 Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `CLOUDFLARE_API_KEY` | Cloudflare API key | No |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | No |
-| `ATLASSIAN_API_TOKEN` | Atlassian API token | No |
-| `GITHUB_TOKEN` | GitHub personal access token | No |
-| `DATADOG_API_KEY` | Datadog API key | No |
-| `AGENT_TIMEOUT_SECONDS` | Max execution time per agent | No (default: 30) |
-| `MAX_CONCURRENT_AGENTS` | Max agents running simultaneously | No (default: 5) |
-
-## 🔄 Extending the System
-
-### Adding a New Agent
-
-1. Create new agent file in `agents/`:
-```python
-from .base import BaseAgent
-
-class NewServiceAgent(BaseAgent):
-    def __init__(self):
-        super().__init__("NewServiceAgent")
-    
-    async def _execute_task(self) -> Dict[str, Any]:
-        # Implement service-specific logic
-        return {"data": "placeholder"}
-```
-
-2. Register in orchestrator:
-```python
-# In orchestrator/orchestrator.py
-self.agents = {
-    # ... existing agents
-    "NewServiceAgent": NewServiceAgent()
-}
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Agent Timeout**: Increase `AGENT_TIMEOUT_SECONDS` in .env
-2. **Rate Limiting**: Adjust `MAX_CONCURRENT_AGENTS` to reduce parallel calls
-3. **Memory Usage**: Implement cleanup in long-running scenarios
-4. **API Errors**: Check credentials and API quotas
-
-## 📈 Performance Optimization
-
-- Use connection pooling for API clients
-- Implement caching for frequently accessed data
-- Add Redis for distributed state management
-- Use background tasks for non-critical operations
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
-
-## 📄 License
-
-MIT License - feel free to use for personal or commercial projects.
-
-## 🆘 Support
-
-For issues or questions, please create an issue in the repository or contact the maintainer.
+**GWEN** is a full-screen terminal application (TUI) for orchestrating multiple agents. Built with TypeScript and Ink, it provides a Claude Code-style interactive interface for running, managing, and creating agents.
 
 ---
 
-**Note**: This is a scaffold implementation with placeholder data. Replace simulated API calls with actual service integrations for production use.
+## 🎯 Features
+
+- **Dual-Pane Dashboard**: Live status table showing all agents at a glance
+- **Scrollable Log Feed**: Detailed logs with full scroll support (↑↓, PgUp/PgDn)
+- **Full-Screen TUI**: Interactive terminal interface powered by Ink
+- **Command Palette**: Press `/` to open a visual command selector
+- **Detail View**: Browse individual agent results with full metrics and output
+- **Backend Integration**: Connects to FastAPI backend for real agent execution
+- **Real-Time Updates**: Dashboard and logs update live during execution
+- **TRON Aesthetic**: Clean, professional sci-fi theme with neon cyan accents
+
+---
+
+## 📋 Prerequisites
+
+- **Node.js 18+**
+- **npm** or **yarn**
+
+---
+
+## 🚀 Installation
+
+### Option 1: Global Installation (Recommended)
+
+```bash
+npm install
+npm run build
+npm link
+```
+
+Now you can run `gwen` from anywhere:
+
+```bash
+gwen
+```
+
+### Option 2: Local Development
+
+```bash
+npm install
+npm run build
+npm start
+```
+
+---
+
+## 📁 Project Structure
+
+```
+gwen-cli/ (repo root)
+├── backend/              # Python FastAPI backend
+│   ├── agents/          # Python monitoring agents
+│   ├── orchestrator/    # Agent orchestration
+│   ├── common/          # Shared utilities
+│   ├── main.py          # FastAPI server
+│   └── requirements.txt # Python dependencies
+├── package.json          # Node.js dependencies and scripts
+├── tsconfig.json         # TypeScript configuration
+├── bin/
+│   └── gwen             # Executable entry point
+├── src/
+│   ├── index.tsx        # Application entry point
+│   ├── App.tsx          # Main Ink application component
+│   ├── types.ts         # TypeScript type definitions
+│   ├── ui/              # UI components
+│   │   ├── Header.tsx           # Header component
+│   │   ├── DashboardTable.tsx   # Agent status table
+│   │   ├── AgentDetailView.tsx  # Full-screen detail view
+│   │   ├── Prompt.tsx           # Command input prompt
+│   │   └── CommandPalette.tsx   # Command selection overlay
+│   ├── core/            # Core logic
+│   │   ├── command-parser.ts    # Command parsing utilities
+│   │   ├── api-client.ts        # Backend API client
+│   │   ├── agent-loader.ts      # Agent discovery and loading
+│   │   └── agent-runner.ts      # Agent execution engine
+│   └── commands/        # Command handlers
+│       ├── handlers.ts          # Local agent commands
+│       └── api-handlers.ts      # Backend API commands
+└── cli-agents/          # Local CLI agent directory
+    ├── example-agent/
+    │   ├── agent.json   # Agent metadata
+    │   └── index.js     # Agent implementation
+    └── service-status/
+        ├── agent.json
+        └── index.js
+```
+
+---
+
+## 🎮 Usage
+
+### Launch GWEN
+
+```bash
+gwen
+```
+
+Once launched, GWEN takes over the terminal. You interact with it by typing commands.
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `/run-agent --auto` | Execute all agents and update dashboard |
+| `/run-agent <name>` | Execute a specific agent |
+| `/list-agents` | List all available agents |
+| `/status` | Get current status of all agents |
+| `/logs <name>` | Get detailed logs for specific agent |
+| `/detail` | Browse agent results in full-screen detail view |
+| `/health` | Check backend health |
+| `/help` | Show help information |
+| `/exit` | Exit GWEN |
+
+### Dashboard View
+
+The top pane shows a live status table:
+
+```
+╭─────────────────────────────────────────────────────────╮
+│ DASHBOARD - Live Agent Status                          │
+│ Agent              Status          Summary              │
+│ ─────────────────────────────────────────────────────── │
+│ CloudflareAgent    ✓ Operational  No incidents over... │
+│ AzureAgent         ⚠ Degraded     2 incidents over...  │
+│ GCPAgent           ✓ Operational  No incidents over... │
+│ AWSAgent           ✓ Operational  No incidents over... │
+╰─────────────────────────────────────────────────────────╯
+```
+
+### Log Feed View
+
+The bottom pane shows scrollable detailed logs:
+- **↑↓** - Scroll one line at a time
+- **PgUp/PgDn** - Fast scroll (5 lines)
+- **Home/End** - Jump to top/bottom
+
+### Command Palette
+
+Press **/** to open the command palette:
+- **↑↓** - Navigate commands
+- **Enter** - Select command
+- **Esc** - Close palette
+
+---
+
+## 🤖 Creating Agents
+
+### Quick Start
+
+```bash
+# Inside GWEN
+/new-agent my-agent
+```
+
+This creates:
+
+```
+cli-agents/my-agent/
+├── agent.json    # Configuration
+└── index.ts      # Implementation
+```
+
+### Agent Structure
+
+**agent.json** - Agent metadata:
+
+```json
+{
+  "name": "my-agent",
+  "version": "1.0.0",
+  "description": "My custom agent",
+  "author": "GWEN",
+  "timeout": 30000
+}
+```
+
+**index.js** - Agent implementation:
+
+```javascript
+/**
+ * Agent entry point
+ * @param {Object} config - Agent configuration from agent.json
+ * @param {Object} context - Execution context with logging
+ */
+export async function run(config, context) {
+  context.log('Agent starting...', 'info');
+  
+  try {
+    // Your agent logic here
+    await doSomething();
+    
+    context.log('Task completed', 'success');
+  } catch (error) {
+    context.log(`Error: ${error.message}`, 'error');
+    throw error;
+  }
+}
+```
+
+### Context API
+
+The `context` object provides:
+
+```javascript
+context.log(message, level)
+```
+
+**Log Levels:**
+- `'info'` - Normal information (white)
+- `'success'` - Success messages (green)
+- `'warn'` - Warnings (yellow)
+- `'error'` - Errors (red)
+- `'system'` - System messages (cyan)
+
+---
+
+## 🔧 Development
+
+### Build
+
+```bash
+npm run build
+```
+
+Compiles TypeScript to JavaScript in `dist/`.
+
+### Watch Mode
+
+```bash
+npm run dev
+```
+
+Automatically rebuilds on file changes.
+
+### Testing Agents
+
+After building, run GWEN and test your agents:
+
+```bash
+npm run build
+npm start
+# Then type: /run-agent my-agent
+```
+
+---
+
+## 🎨 Architecture
+
+### Runtime Flow
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ User runs `gwen` command                                 │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ bin/gwen → dist/index.js → Ink App boots                │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ App.tsx renders:                                         │
+│  • Header (GWEN SYSTEM ONLINE)                          │
+│  • OutputPanel (log display)                            │
+│  • Prompt (command input)                               │
+│  • CommandPalette (when "/" typed)                      │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ useInput hook intercepts keystrokes                      │
+│  • "/" → Opens command palette                          │
+│  • Enter → Executes command                             │
+│  • ↑↓ → Navigates palette                               │
+│  • Esc → Closes palette                                 │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ command-parser.ts parses input                           │
+│  • Extracts command name and arguments                   │
+│  • Returns { command, args }                            │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ handlers.ts routes to command handler                    │
+│  • /run-agent → runAgent()                              │
+│  • /list-agents → listAgents()                          │
+│  • /new-agent → createAgent()                           │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ agent-loader.ts discovers and loads agent                │
+│  • Reads agents/ directory                              │
+│  • Parses agent.json                                    │
+│  • Loads index.js module                                │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ agent-runner.ts executes agent                           │
+│  • Creates AgentContext with log callback               │
+│  • Calls agent.run(config, context)                     │
+│  • Handles timeout and errors                           │
+└────────────────────┬─────────────────────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│ Agent streams logs → UI updates in real-time            │
+│  • context.log() → addLog() → setState()                │
+│  • OutputPanel re-renders with new logs                 │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Component Hierarchy
+
+```
+App (state management, input handling)
+├── Header (static header)
+├── OutputPanel (displays logs)
+├── Prompt (command input)
+└── CommandPalette (command selector)
+```
+
+### Data Flow
+
+1. **User Input** → `useInput` hook → Update state
+2. **Command Execution** → Handler → Agent Loader → Agent Runner
+3. **Agent Logging** → `context.log()` → `addLog()` → State update
+4. **UI Update** → React re-render → Ink terminal update
+
+---
+
+## 🎨 TRON Aesthetic
+
+The UI uses:
+- **Colors**: Neon cyan (`#00FFFF`), white, black
+- **Borders**: Rounded borders with cyan color
+- **Symbols**: `◢◤◥◣` (header), `▶` (prompt), `•✓✖⚠◆` (logs)
+- **Fonts**: Terminal monospace
+
+---
+
+## 🐛 Troubleshooting
+
+### TypeScript Errors
+
+The TypeScript errors about missing modules (react, ink, path, fs) will resolve once you run:
+
+```bash
+npm install
+```
+
+### Permission Denied (bin/gwen)
+
+Make the bin script executable:
+
+```bash
+chmod +x bin/gwen
+```
+
+### Agent Not Found
+
+Ensure:
+1. Agent has `agent.json` and `index.js`
+2. `index.js` exports a `run()` function
+3. Agent is in the `agents/` directory
+
+### Logs Not Appearing
+
+Check:
+- `context.log()` is called with valid level
+- Agent function is `async`
+- Errors are caught and logged
+
+---
+
+## 📝 Examples
+
+### Example 1: Run Single Agent
+
+```
+▶ /run-agent example-agent
+```
+
+Output:
+```
+◆ [12:34:56] [system] Starting agent: example-agent
+• [12:34:56] [example-agent] Example agent starting...
+• [12:34:56] [example-agent] Fetching data...
+✓ [12:34:57] [example-agent] Data retrieved successfully
+✓ [12:34:57] [example-agent] Example agent completed
+✓ [12:34:57] [system] Agent completed: example-agent
+```
+
+### Example 2: Auto-Run All Agents
+
+```
+▶ /run-agent --auto
+```
+
+Executes all agents in sequence.
+
+### Example 3: Create New Agent
+
+```
+▶ /new-agent deploy-checker
+```
+
+Creates `cli-agents/deploy-checker/` with templates.
+
+---
+
+## 🚀 Next Steps
+
+1. **Add More Agents**: Create agents for your use cases
+2. **Extend Commands**: Add custom commands in `handlers.ts`
+3. **Customize UI**: Modify components in `src/ui/`
+4. **Add Persistence**: Store execution history in a database
+5. **WebSocket Support**: Real-time updates from remote agents
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+## 🆘 Support
+
+For issues or questions, create an issue in the repository.
+
+---
+
+**Built with [Ink](https://github.com/vadimdemedes/ink) - React for CLIs** 🎨
